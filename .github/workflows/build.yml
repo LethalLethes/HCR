@@ -1,0 +1,37 @@
+name: Build HCR Mod Dylib
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Theos
+        run: |
+          brew install ldid xz
+          git clone --recursive https://github.com/theos/theos.git $THEOS
+          curl -fsSL https://github.com/theos/sdks/releases/download/2024-10/iPhoneOS17.5.sdk.tar.xz | tar -xJf - -C $THEOS/sdks
+        env:
+          THEOS: /opt/theos
+
+      - name: Build Dylib
+        run: |
+          make -j$(nproc)
+        env:
+          THEOS: /opt/theos
+
+      - name: Upload Dylib
+        uses: actions/upload-artifact@v4
+        with:
+          name: HCRMod-dylib
+          path: |
+            .theos/obj/debug/*.dylib
+            packages/*.deb
+          if-no-files-found: warn
