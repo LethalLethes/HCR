@@ -17,16 +17,14 @@ jobs:
         run: |
           brew install ldid xz
           git clone --recursive https://github.com/theos/theos.git $HOME/theos
-          curl -fsSL https://github.com/theos/sdks/releases/download/2024-10/iPhoneOS17.5.sdk.tar.xz | tar -xJf - -C $HOME/theos/sdks
-        env:
-          THEOS: $HOME/theos
+          curl -fsSL https://github.com/theos/sdks/releases/latest/download/iPhoneOS16.5.sdk.tar.xz | tar -xJf - -C $HOME/theos/sdks
 
       - name: Build Dylib
         run: |
-          make -j$(nproc)
-        env:
-          THEOS: $HOME/theos
-
+          export THEOS=$HOME/theos
+          export THEOS_MAKE_PATH=$HOME/theos/makefiles
+          make -j4
+        
       - name: Upload Dylib
         uses: actions/upload-artifact@v4
         with:
